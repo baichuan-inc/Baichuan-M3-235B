@@ -16,6 +16,8 @@
 
 **From Inquiry to Decision: Building Trustworthy Medical AI**
 
+🏥 Experience AI-Powered Medical Inquiry: [ying.ai](https://ying.ai/)
+
 </div>
 
 ## 🌟 Model Overview
@@ -26,9 +28,9 @@ In contrast to prior approaches that primarily focus on static question answerin
 
 ### Core Highlights
 
-- 🏆 **Surpasses GPT-5.2**: Outperforms OpenAI's latest model across HealthBench, HealthBench-Hard, hallucination evaluation, and BCOSCE, establishing a new SOTA in medical AI
-- 🩺 **High-Fidelity Clinical Inquiry**: The only model to rank first across all three BCOSCE dimensions—Clinical Inquiry, Laboratory Testing, and Diagnosis
-- 🧠 **Low Hallucination, High Reliability**: Achieves substantially lower hallucination rates than GPT-5.2 through Fact-Aware RL, even without external tools
+- 🏆 **Surpasses GPT-5.2**: Outperforms OpenAI's latest model across HealthBench, HealthBench-Hard, hallucination evaluation, and SCAN-bench, establishing a new SOTA in medical AI
+- 🩺 **High-Fidelity Clinical Inquiry**: The only model to rank first across all three SCAN-bench dimensions—Clinical Inquiry, Laboratory Testing, and Diagnosis
+- 🧠 **Low Hallucination, High Reliability**: Achieves lower hallucination rate than GPT-5.2 through Fact-Aware RL, even without external tools
 - ⚡ **Efficient Deployment**: W4 quantization reduces memory to 26% of original; Gated Eagle3 speculative decoding achieves 96% speedup
 
 
@@ -44,19 +46,19 @@ HealthBench is OpenAI's authoritative medical benchmark, constructed by 262 prac
 
 Compared to Baichuan-M2, **Baichuan-M3 improves by 28 percentage points on HealthBench-Hard**, reaching 44.4 and surpassing GPT-5.2. It also ranks first on the HealthBench Total leaderboard.
 
-For hallucination evaluation, we decompose long-form responses into fine-grained, verifiable atomic medical claims and validate each against authoritative medical evidence. **Even in a tool-free setting, Baichuan-M3 exhibits lower hallucination rates than GPT-5.2.**
+For hallucination evaluation, we decompose long-form responses into fine-grained, verifiable atomic medical claims and validate each against authoritative medical evidence. **Even in a tool-free setting, Baichuan-M3 achieves lower hallucination rate than GPT-5.2.**
 
-### BCOSCE Evaluation
+### SCAN-bench Evaluation
 
-BCOSCE (BaiChuan Objective Structured Clinical Examination) is our end-to-end clinical decision-making benchmark that simulates the complete clinical workflow from patient encounter to final diagnosis, evaluating models' high-fidelity clinical inquiry capabilities through three stations: History Taking, Ancillary Investigations, and Final Diagnosis.
+SCAN-bench is our end-to-end clinical decision-making benchmark that simulates the complete clinical workflow from patient encounter to final diagnosis, evaluating models' high-fidelity clinical inquiry capabilities through three stations: History Taking, Ancillary Investigations, and Final Diagnosis.
 
 <div align="center">
-  <img src="images/osce_metrics.png" alt="BCOSCE Performance" width="80%">
+  <img src="images/scan_metrics.png" alt="SCAN-bench Performance" width="80%">
 </div>
 
 Baichuan-M3 **ranks first across all three core dimensions**, outperforming the second-best model by 12.4 points in Clinical Inquiry.
 
-> 📢 The BCOSCE benchmark will be open-sourced soon. Stay tuned.
+> 📢 The SCAN-bench will be open-sourced soon. Stay tuned.
 
 
 ## 🔬 Technical Features
@@ -65,7 +67,7 @@ Baichuan-M3 **ranks first across all three core dimensions**, outperforming the 
 
 ### SPAR: Segmented Pipeline Reinforcement Learning
 
-To address reward sparsity and credit assignment challenges in long clinical interactions, we propose **SPAR (Step-Penalized Advantage with Relative baseline)**: it decomposes clinical workflows into four stages—history taking, differential diagnosis, laboratory testing, and final diagnosis—each with independent rewards, combined with OSCE process-level rewards for precise credit assignment, driving the model to construct auditable and complete decision logic.
+To address reward sparsity and credit assignment challenges in long clinical interactions, we propose **SPAR (Step-Penalized Advantage with Relative baseline)**: it decomposes clinical workflows into four stages—history taking, differential diagnosis, laboratory testing, and final diagnosis—each with independent rewards, combined with process-level rewards for precise credit assignment, driving the model to construct auditable and complete decision logic.
 
 <div align="center">
   <img src="images/SPAR_schema.jpeg" alt="SPAR Schema" width="80%">
@@ -126,19 +128,28 @@ python -m sglang.launch_server --model-path baichuan-inc/Baichuan-M3-235B --reas
 vllm serve baichuan-inc/Baichuan-M3-235B --reasoning-parser qwen3
 ```
 
-### MTP Speculative Decoding
+### Speculative Decoding with SGlang `(>=0.5.5.post3)`
 
+1. To support the gated attention in eagle3 draft model, just replace the code llama_eagle3.py in the sglang installation directory with our draft/llama_eagle3.py, for example:
+```shell
+cp -f /path/to/draft/llama_eagle3.py /sgl-workspace/sglang/python/sglang/srt/models/
+```
+
+2. Launch sglang (taking 8 * H20(96G) deployment as an example):
 ```shell
 python3 -m sglang.launch_server \
-    --model baichuan-inc/Baichuan-M3-235B \
-    --speculative-algorithm EAGLE3 \
-    --speculative-draft-model-path baichuan-inc/Baichuan-M3-235B/draft \
-    --speculative-num-steps 6 \
-    --speculative-eagle-topk 10 \
-    --speculative-num-draft-tokens 32 \
-    --mem-fraction 0.9 \
-    --reasoning-parser qwen3 \
-    --dtype bfloat16
+   --model-path baichuan-inc/Baichuan-M3-235B \
+   --tensor-parallel-size 8 \
+   --trust-remote-code \
+   --mem-fraction-static 0.8 \
+   --host 0.0.0.0 \
+   --port 80 \
+   --speculative-algorithm EAGLE3 \
+   --speculative-draft-model-path baichuan-inc/Baichuan-M3-235B/draft \
+   --speculative-num-steps 5 \
+   --speculative-eagle-topk 8 \
+   --speculative-num-draft-tokens 32 \
+   --reasoning-parser qwen3
 ```
 
 

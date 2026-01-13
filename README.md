@@ -16,6 +16,8 @@
 
 **从问诊到决策，构建可信赖的医疗 AI**
 
+🏥 即刻体验AI严肃问诊：[ying.ai](https://ying.ai/)
+
 </div>
 
 ## 🌟 模型简介
@@ -26,9 +28,9 @@
 
 ### 核心亮点
 
-- 🏆 **超越 GPT-5.2**：在 HealthBench、HealthBench-Hard、幻觉评测及 BCOSCE 评测中全面超越 OpenAI 最新模型，成为全球最强医疗增强模型
-- 🩺 **满血问诊能力**：唯一在 BCOSCE 三大核心维度（临床问诊、实验室检查、疾病诊断）均位列榜首的模型
-- 🧠 **低幻觉高可靠**：通过 Fact-Aware RL 框架，在无工具辅助下实现显著低于 GPT-5.2 的幻觉率
+- 🏆 **超越 GPT-5.2**：在 HealthBench、HealthBench-Hard、幻觉评测及 SCAN-bench 评测中全面超越 OpenAI 最新模型，成为全球最强医疗增强模型
+- 🩺 **满血问诊能力**：唯一在 SCAN-bench 三大核心维度（临床问诊、实验室检查、疾病诊断）均位列榜首的模型
+- 🧠 **低幻觉高可靠**：通过 Fact-Aware RL 框架，在无工具辅助下实现低于 GPT-5.2 的幻觉率
 - ⚡ **高效推理部署**：W4 量化降低 74% 显存占用，Gated Eagle3 投机解码带来 96% 加速
 
 
@@ -44,19 +46,19 @@ HealthBench 是 OpenAI 发布的权威医疗评测集，由 262 名来自 60 个
 
 相较于 Baichuan-M2，**Baichuan-M3 在 HealthBench-Hard 上提升 28 个百分点**，达到 44.4 分，超越 GPT-5.2，在 HealthBench 总榜上位列第一。
 
-在幻觉评测中，我们将长文本回答分解为细粒度的可验证原子医学声明，基于权威医学证据进行独立校验。**即使在无工具辅助下，Baichuan-M3 的幻觉率也低于 GPT-5.2。**
+在幻觉评测中，我们将长文本回答分解为细粒度的可验证原子医学声明，基于权威医学证据进行独立校验。**即使在无工具辅助下，Baichuan-M3 取得了比 GPT-5.2 更低的幻觉率。**
 
-### BCOSCE 评测
+### SCAN-bench 评测
 
-BCOSCE（BaiChuan Objective Structured Clinical Examination）是我们构建的端到端临床决策评测集，模拟从接诊到确诊的完整临床流程，通过病史收集、辅助检查、精确诊断三个考站评估模型的满血问诊能力。
+SCAN-bench 是我们构建的端到端临床决策评测集，模拟从接诊到确诊的完整临床流程，通过病史收集、辅助检查、精确诊断三个考站评估模型的满血问诊能力。
 
 <div align="center">
-  <img src="images/osce_metrics.png" alt="BCOSCE Performance" width="80%">
+  <img src="images/scan_metrics.png" alt="SCAN-bench Performance" width="80%">
 </div>
 
 Baichuan-M3 **在三大核心维度均位列榜首**的模型，在最具挑战性的临床问诊环节领先次优模型 12.4 分。
 
-> 📢 BCOSCE 评测集将于近期开源发布，敬请期待。
+> 📢 SCAN-bench 将于近期开源发布，敬请期待。
 
 
 ## 🔬 技术特色
@@ -65,7 +67,7 @@ Baichuan-M3 **在三大核心维度均位列榜首**的模型，在最具挑战�
 
 ### SPAR：分段流水线强化学习
 
-针对医疗场景极长交互链路的"奖励稀疏"与"信用分配"挑战，我们提出 **SPAR（Step-Penalized Advantage with Relative baseline）** 算法：将临床流程解耦为病史采集、鉴别诊断、检验检查、精确诊断四个独立奖励阶段，配合 OSCE 过程级奖励实现精准的信用分配，驱动模型构建可复核的完整决策逻辑。
+针对医疗场景极长交互链路的"奖励稀疏"与"信用分配"挑战，我们提出 **SPAR（Step-Penalized Advantage with Relative baseline）** 算法：将临床流程解耦为病史采集、鉴别诊断、检验检查、精确诊断四个独立奖励阶段，配合过程级奖励实现精准的信用分配，驱动模型构建可复核的完整决策逻辑。
 
 <div align="center">
   <img src="images/SPAR_schema.jpeg" alt="SPAR Schema" width="80%">
@@ -126,21 +128,31 @@ python -m sglang.launch_server --model-path baichuan-inc/Baichuan-M3-235B --reas
 vllm serve baichuan-inc/Baichuan-M3-235B --reasoning-parser qwen3
 ```
 
-### MTP 投机解码加速
+### 使用 SGlang 部署投机采样模型 `(>=0.5.5.post3)`
+
+1. 为了在 draft 模型中支持 gate attention 功能，只需把 sglang 工作目录中的 llama_eagle3.py 替换为我们的 draft/llama_eagle3.py，例如：
+
+```shell
+cp -f /path/to/draft/llama_eagle3.py /sgl-workspace/sglang/python/sglang/srt/models/
+```
+
+2. 启动 sglang 服务（以 8 * H20(96G) 实例为例）:
 
 ```shell
 python3 -m sglang.launch_server \
-    --model baichuan-inc/Baichuan-M3-235B \
-    --speculative-algorithm EAGLE3 \
-    --speculative-draft-model-path baichuan-inc/Baichuan-M3-235B/draft \
-    --speculative-num-steps 6 \
-    --speculative-eagle-topk 10 \
-    --speculative-num-draft-tokens 32 \
-    --mem-fraction 0.9 \
-    --reasoning-parser qwen3 \
-    --dtype bfloat16
+   --model-path baichuan-inc/Baichuan-M3-235B \
+   --tensor-parallel-size 8 \
+   --trust-remote-code \
+   --mem-fraction-static 0.8 \
+   --host 0.0.0.0 \
+   --port 80 \
+   --speculative-algorithm EAGLE3 \
+   --speculative-draft-model-path baichuan-inc/Baichuan-M3-235B/draft \
+   --speculative-num-steps 5 \
+   --speculative-eagle-topk 8 \
+   --speculative-num-draft-tokens 32 \
+   --reasoning-parser qwen3
 ```
-
 
 ## ⚠️ 使用须知
 
