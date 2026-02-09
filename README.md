@@ -188,10 +188,10 @@ python3 -m sglang.launch_server \
 ## 📚 引用
 
 ```bibtex
-@misc{baichuan-m3,
-    title={Baichuan-M3: Modeling Clinical Inquiry for Reliable Medical Decision-Making},
-    author={Baichuan M3 Team},
-    year={2025},
-    url={https://github.com/baichuan-inc/Baichuan-M3-235B},
+@article{Baichuan-M3 Technical Report,
+  title={Baichuan-M3: Modeling Clinical Inquiry for Reliable Medical Decision-Making},
+  author={Baichuan-M3 Team: Chengfeng Dou, Fan Yang, Fei Li, Jiyuan Jia, Qiang Ju, Shuai Wang, Tianpeng Li, Xiangrong Zeng, Yijie Zhou, Hongda Zhang, Jinyang Tai, Linzhuang Sun, Peidong Guo, Yichuan Mo, Xiaochuan Wang, Hengfu Cui, Zhishou Zhang},
+  journal={arXiv preprint arXiv:2602.06570},
+  year={2026}
 }
 ```
