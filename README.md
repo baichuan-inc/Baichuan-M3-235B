@@ -6,7 +6,7 @@
 [![Hugging Face](https://img.shields.io/badge/🤗%20Hugging%20Face-Model-yellow)](https://huggingface.co/baichuan-inc/Baichuan-M3-235B)
 [![M3 GPTQ-4bit](https://img.shields.io/badge/🤗%20M3%20GPTQ--4bit-Model-orange)](https://huggingface.co/baichuan-inc/Baichuan-M3-235B-GPTQ-INT4)
 [![Tech Blog](https://img.shields.io/badge/📗%20技术博客-Blog-green)](https://www.baichuan-ai.com/blog/baichuan-M3)
-[![Technical Report](https://img.shields.io/badge/📚20技术报告-arXiv%3A2602.06570-b31b1b?style=flat-square)](https://arxiv.org/pdf/2602.06570)
+[![Technical Report](https://img.shields.io/badge/📚%20技术报告-arXiv%3A2602.06570-b31b1b?style=flat-square)](https://arxiv.org/pdf/2602.06570)
 
 <h4 align="center">
     <p>
