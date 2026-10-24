@@ -1,6 +1,6 @@
 EXTRACT_CLAIMS_PROMPT = """\
 ### Introduction
-Your task is to list relevant facts in an assistant's response to a given prompt. Your output will be used as the first step in the following fact- checking pipeline used to evaluate an assistant's response for factual correctness.
+Your task is to list relevant facts in an assistant's response to a given prompt. Your output will be used as the first step in the following fact-checking pipeline used to evaluate an assistant's response for factual correctness.
 
 Fact-Checking Pipeline:
 1. Given a prompt and assistant's response, list all relevant factual claims made by the assistant.
